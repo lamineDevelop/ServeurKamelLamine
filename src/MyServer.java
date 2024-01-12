@@ -42,20 +42,22 @@ class Conversation implements Runnable {
         try {
            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-
-           if(ois.readObject()  instanceof Client){
-                Client client = (Client) ois.readObject();
+           Object input = ois.readObject();
+           if(input instanceof Client){
+                Client client = (Client) input;
                 client.setSocketClient(socket);
                 client.setDateConnexion(LocalDateTime.now());
                listClient.add(client);
-            } else if(ois.readObject()  instanceof Trame){
-               Trame trame = (Trame) ois.readObject();
+               // AFAIRE: envoyé listClient a tout les client déja connecté
+
+            } else if(input instanceof Trame){
+               Trame trame = (Trame) input;
                 if(trame.getForGroup()){
                     listClient.stream().filter(cl->cl.getSocketClient().isConnected()).
-                            forEach(res->
+                            forEach(member->
                             {
                                 try {
-                                    ObjectOutputStream objectOutputStream = new ObjectOutputStream(res.getSocketClient().getOutputStream());
+                                    ObjectOutputStream objectOutputStream = new ObjectOutputStream(member.getSocketClient().getOutputStream());
                                     objectOutputStream.writeObject(trame);
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
@@ -73,24 +75,7 @@ class Conversation implements Runnable {
 
 
 
-
-
-
-
-
-            InputStream is = this.socket.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader bf = new BufferedReader(isr);
-
-            OutputStream os = this.socket.getOutputStream();
-            OutputStreamWriter isw = new OutputStreamWriter(os);
-            PrintWriter pw = new PrintWriter(isw, true);
-            pw.write("Donner un chiffre");
-            String reponse = bf.readLine();
-            System.out.println("le client a répondu " + reponse);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
