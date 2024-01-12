@@ -21,13 +21,7 @@ public class MyServer implements Runnable {
     public void run() {
         while (true) {
             try {
-                System.out.println("....... ******** ........");
-                System.out.println(".......  SERVEUR ........");
-                System.out.println("....... ******** ........");
                 Socket sock = serverSocket.accept();
-                System.out.println("Nouvelle connexion ...");
-
-
                 new Thread(new Conversation(sock)).start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
